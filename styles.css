@@ -304,6 +304,14 @@ body::before {
   overflow: hidden;
 }
 
+.workspace .panel:first-of-type {
+  flex: 0 0 70%;
+}
+
+.workspace .right-panel {
+  flex: 1 1 0;
+}
+
 .panel-header {
   display: flex;
   justify-content: space-between;
@@ -548,6 +556,12 @@ body::before {
 
   .panel {
     min-height: 350px;
+    flex: 1 1 auto;
+  }
+
+  .workspace .panel:first-of-type,
+  .workspace .right-panel {
+    flex: 1 1 auto;
   }
 
   .toolbar-select {
