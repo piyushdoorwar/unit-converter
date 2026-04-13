@@ -1,8 +1,8 @@
-const categorySelect = document.getElementById("category");
+const categoryList = document.getElementById("category-list");
 const precisionSelect = document.getElementById("precision");
 const valueInput = document.getElementById("value-input");
-const fromUnitSelect = document.getElementById("from-unit");
-const toUnitSelect = document.getElementById("to-unit");
+const fromUnitList = document.getElementById("from-unit-list");
+const toUnitList = document.getElementById("to-unit-list");
 const swapButton = document.getElementById("swap-units");
 const copyButton = document.getElementById("copy-result");
 const resultNode = document.getElementById("result");
@@ -14,44 +14,107 @@ const workspace = document.querySelector(".workspace");
 const leftPanel = document.querySelector(".panel");
 
 let isResizing = false;
+let selectedCategoryKey = (function () {
+  const hash = window.location.hash.slice(1);
+  return UNIT_CATEGORIES[hash] ? hash : DEFAULT_CATEGORY;
+})();
+let selectedFromUnit = "";
+let selectedToUnit = "";
 
 function getCurrentCategory() {
-  return UNIT_CATEGORIES[categorySelect.value];
+  return UNIT_CATEGORIES[selectedCategoryKey];
 }
 
-function createOption(value, label) {
-  const option = document.createElement("option");
-  option.value = value;
-  option.textContent = label;
-  return option;
+function createChip(label, clickHandler, activeClass) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = activeClass;
+  button.textContent = label;
+  button.addEventListener("click", clickHandler);
+  return button;
 }
 
-function populateCategories() {
-  Object.keys(UNIT_CATEGORIES).forEach((key) => {
-    const category = UNIT_CATEGORIES[key];
-    categorySelect.append(createOption(key, category.label));
+function renderCategoryChips() {
+  categoryList.innerHTML = "";
+
+  CATEGORY_GROUPS.forEach((group) => {
+    const row = document.createElement("div");
+    row.className = "category-group";
+
+    const groupLabel = document.createElement("span");
+    groupLabel.className = "category-group-label";
+    groupLabel.textContent = group.label;
+    row.append(groupLabel);
+
+    const chips = document.createElement("div");
+    chips.className = "category-group-chips";
+
+    group.keys.forEach((key) => {
+      const category = UNIT_CATEGORIES[key];
+      if (!category) return;
+      const className = key === selectedCategoryKey ? "category-chip active" : "category-chip";
+      const chip = createChip(
+        category.label,
+        () => {
+          if (selectedCategoryKey === key) return;
+          selectedCategoryKey = key;
+          window.location.hash = key;
+          renderCategoryChips();
+          populateUnits(true);
+          convertAndRender();
+        },
+        className
+      );
+      chips.append(chip);
+    });
+
+    row.append(chips);
+    categoryList.append(row);
   });
-
-  categorySelect.value = DEFAULT_CATEGORY;
 }
 
-function populateUnits() {
+function renderUnitButtons(container, activeUnit, onSelect) {
+  const category = getCurrentCategory();
+  container.innerHTML = "";
+
+  Object.entries(category.units).forEach(([unitKey, unit]) => {
+    const label = `${unit.label} (${unitKey})`;
+    const className = unitKey === activeUnit ? "unit-btn active" : "unit-btn";
+    const button = createChip(label, () => onSelect(unitKey), className);
+    container.append(button);
+  });
+}
+
+function populateUnits(forceReset = false) {
   const category = getCurrentCategory();
   const unitEntries = Object.entries(category.units);
+  const unitKeys = unitEntries.map(([key]) => key);
+  const shouldReset =
+    forceReset ||
+    !unitKeys.includes(selectedFromUnit) ||
+    !unitKeys.includes(selectedToUnit) ||
+    !selectedFromUnit ||
+    !selectedToUnit;
 
-  fromUnitSelect.innerHTML = "";
-  toUnitSelect.innerHTML = "";
-
-  unitEntries.forEach(([unitKey, unit]) => {
-    const text = `${unit.label} (${unitKey})`;
-    fromUnitSelect.append(createOption(unitKey, text));
-    toUnitSelect.append(createOption(unitKey, text));
-  });
-
-  if (unitEntries.length > 1) {
-    fromUnitSelect.value = unitEntries[0][0];
-    toUnitSelect.value = unitEntries[1][0];
+  if (shouldReset) {
+    selectedFromUnit = unitKeys[0] || "";
+    selectedToUnit = unitKeys[1] || unitKeys[0] || "";
   }
+
+  renderUnitButtons(fromUnitList, selectedFromUnit, handleFromUnitSelect);
+  renderUnitButtons(toUnitList, selectedToUnit, handleToUnitSelect);
+}
+
+function handleFromUnitSelect(unitKey) {
+  selectedFromUnit = unitKey;
+  renderUnitButtons(fromUnitList, selectedFromUnit, handleFromUnitSelect);
+  convertAndRender();
+}
+
+function handleToUnitSelect(unitKey) {
+  selectedToUnit = unitKey;
+  renderUnitButtons(toUnitList, selectedToUnit, handleToUnitSelect);
+  convertAndRender();
 }
 
 function showError(message) {
@@ -80,9 +143,9 @@ function createAllResultsMarkup(results, precision, category, sourceUnit) {
 function convertAndRender() {
   const validation = parseNumericInput(valueInput.value);
   const precision = Number(precisionSelect.value);
-  const categoryKey = categorySelect.value;
-  const fromUnit = fromUnitSelect.value;
-  const toUnit = toUnitSelect.value;
+  const categoryKey = selectedCategoryKey;
+  const fromUnit = selectedFromUnit;
+  const toUnit = selectedToUnit;
   const category = UNIT_CATEGORIES[categoryKey];
 
   if (!validation.valid) {
@@ -104,9 +167,10 @@ function convertAndRender() {
 }
 
 function swapUnits() {
-  const fromValue = fromUnitSelect.value;
-  fromUnitSelect.value = toUnitSelect.value;
-  toUnitSelect.value = fromValue;
+  const fromValue = selectedFromUnit;
+  selectedFromUnit = selectedToUnit;
+  selectedToUnit = fromValue;
+  populateUnits(false);
   convertAndRender();
 }
 
@@ -152,14 +216,7 @@ function initializeResize() {
 }
 
 function bindEvents() {
-  categorySelect.addEventListener("change", () => {
-    populateUnits();
-    convertAndRender();
-  });
-
-  [precisionSelect, fromUnitSelect, toUnitSelect].forEach((node) => {
-    node.addEventListener("change", convertAndRender);
-  });
+  precisionSelect.addEventListener("change", convertAndRender);
 
   valueInput.addEventListener("input", convertAndRender);
   swapButton.addEventListener("click", swapUnits);
@@ -167,8 +224,9 @@ function bindEvents() {
 }
 
 function init() {
-  populateCategories();
-  populateUnits();
+  renderCategoryChips();
+  populateUnits(true);
+
   bindEvents();
   initializeResize();
 

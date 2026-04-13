@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Unit Converter DevTool</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="styles.css" />
     <script defer src="units.js"></script>
     <script defer src="converter.js"></script>
@@ -18,9 +19,8 @@
       </header>
 
       <div class="toolbar" role="toolbar" aria-label="Converter controls">
-        <div class="toolbar-group">
-          <span class="toolbar-label">Category</span>
-          <select id="category" class="toolbar-select" aria-label="Conversion category"></select>
+        <div class="toolbar-group toolbar-group-grow">
+          <div id="category-list" class="category-list" aria-label="Conversion category"></div>
         </div>
         <div class="toolbar-divider"></div>
         <div class="toolbar-group">
@@ -54,9 +54,9 @@
             <label class="field-label" for="value-input">Value</label>
             <input id="value-input" class="field-input" type="text" inputmode="decimal" placeholder="Enter a number" autocomplete="off" />
 
-            <label class="field-label" for="from-unit">From Unit</label>
-            <div class="unit-row">
-              <select id="from-unit" class="field-select" aria-label="From unit"></select>
+            <span class="field-label">From Unit</span>
+            <div class="unit-row unit-row-picker">
+              <div id="from-unit-list" class="unit-picker" aria-label="From unit"></div>
               <button id="swap-units" class="swap-btn" aria-label="Swap units" data-tooltip="Swap Units">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="17 1 21 5 17 9"></polyline>
@@ -67,8 +67,8 @@
               </button>
             </div>
 
-            <label class="field-label" for="to-unit">To Unit</label>
-            <select id="to-unit" class="field-select" aria-label="To unit"></select>
+            <span class="field-label">To Unit</span>
+            <div id="to-unit-list" class="unit-picker" aria-label="To unit"></div>
           </div>
 
           <div id="error" class="error" role="alert" aria-live="polite"></div>
