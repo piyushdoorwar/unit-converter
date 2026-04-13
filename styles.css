@@ -149,6 +149,77 @@ body::before {
   color: var(--text);
 }
 
+.precision-dropdown {
+  position: relative;
+}
+
+.precision-trigger {
+  width: 70px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.precision-trigger svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+
+.precision-dropdown.open .precision-trigger {
+  border-color: var(--accent-purple-light);
+  box-shadow: 0 0 0 2px rgba(103, 57, 183, 0.2);
+}
+
+.precision-dropdown.open .precision-trigger svg {
+  transform: rotate(180deg);
+}
+
+.precision-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 70px;
+  background: #1f1f1f;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  padding: 0.25rem;
+  display: none;
+  z-index: 50;
+}
+
+.precision-dropdown.open .precision-menu {
+  display: block;
+}
+
+.precision-option {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  border-radius: 8px;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.precision-option:hover,
+.precision-option.active {
+  background: rgba(103, 57, 183, 0.35);
+}
+
 .category-list {
   display: flex;
   flex-wrap: wrap;
@@ -388,6 +459,31 @@ body::before {
   overflow: auto;
   padding: 0.25rem;
   margin: -0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.65) rgba(255, 255, 255, 0.06);
+}
+
+.unit-picker::-webkit-scrollbar,
+.all-results::-webkit-scrollbar {
+  width: 10px;
+}
+
+.unit-picker::-webkit-scrollbar-track,
+.all-results::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+
+.unit-picker::-webkit-scrollbar-thumb,
+.all-results::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.85), rgba(103, 57, 183, 0.85));
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.18);
+}
+
+.unit-picker::-webkit-scrollbar-thumb:hover,
+.all-results::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(167, 119, 255, 0.95), rgba(118, 70, 199, 0.95));
 }
 
 .unit-row .unit-picker {
@@ -498,6 +594,8 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.65) rgba(255, 255, 255, 0.06);
 }
 
 .result-row {

@@ -1,5 +1,8 @@
 const categoryList = document.getElementById("category-list");
-const precisionSelect = document.getElementById("precision");
+const precisionDropdown = document.getElementById("precision-dropdown");
+const precisionTrigger = document.getElementById("precision-trigger");
+const precisionMenu = document.getElementById("precision-menu");
+const precisionValue = document.getElementById("precision-value");
 const valueInput = document.getElementById("value-input");
 const fromUnitList = document.getElementById("from-unit-list");
 const toUnitList = document.getElementById("to-unit-list");
@@ -20,6 +23,7 @@ let selectedCategoryKey = (function () {
 })();
 let selectedFromUnit = "";
 let selectedToUnit = "";
+let selectedPrecision = 4;
 
 function getCurrentCategory() {
   return UNIT_CATEGORIES[selectedCategoryKey];
@@ -122,6 +126,52 @@ function showError(message) {
   errorNode.style.display = message ? "block" : "none";
 }
 
+function setPrecision(value) {
+  selectedPrecision = value;
+  precisionValue.textContent = String(value);
+
+  precisionMenu.querySelectorAll(".precision-option").forEach((option) => {
+    const isActive = Number(option.dataset.value) === value;
+    option.classList.toggle("active", isActive);
+    if (isActive) {
+      option.setAttribute("aria-selected", "true");
+    } else {
+      option.removeAttribute("aria-selected");
+    }
+  });
+
+  precisionDropdown.classList.remove("open");
+  precisionTrigger.setAttribute("aria-expanded", "false");
+}
+
+function bindPrecisionDropdown() {
+  precisionTrigger.addEventListener("click", () => {
+    const isOpen = precisionDropdown.classList.toggle("open");
+    precisionTrigger.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  precisionMenu.querySelectorAll(".precision-option").forEach((option) => {
+    option.addEventListener("click", () => {
+      setPrecision(Number(option.dataset.value));
+      convertAndRender();
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!precisionDropdown.contains(event.target)) {
+      precisionDropdown.classList.remove("open");
+      precisionTrigger.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      precisionDropdown.classList.remove("open");
+      precisionTrigger.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
 function createAllResultsMarkup(results, precision, category, sourceUnit) {
   return results
     .filter((entry) => entry.unitKey !== sourceUnit)
@@ -142,7 +192,7 @@ function createAllResultsMarkup(results, precision, category, sourceUnit) {
 
 function convertAndRender() {
   const validation = parseNumericInput(valueInput.value);
-  const precision = Number(precisionSelect.value);
+  const precision = selectedPrecision;
   const categoryKey = selectedCategoryKey;
   const fromUnit = selectedFromUnit;
   const toUnit = selectedToUnit;
@@ -216,8 +266,6 @@ function initializeResize() {
 }
 
 function bindEvents() {
-  precisionSelect.addEventListener("change", convertAndRender);
-
   valueInput.addEventListener("input", convertAndRender);
   swapButton.addEventListener("click", swapUnits);
   copyButton.addEventListener("click", copyResult);
@@ -226,6 +274,8 @@ function bindEvents() {
 function init() {
   renderCategoryChips();
   populateUnits(true);
+  bindPrecisionDropdown();
+  setPrecision(selectedPrecision);
 
   bindEvents();
   initializeResize();

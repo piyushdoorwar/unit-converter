@@ -25,13 +25,21 @@
         <div class="toolbar-divider"></div>
         <div class="toolbar-group">
           <span class="toolbar-label">Precision</span>
-          <select id="precision" class="toolbar-select" aria-label="Decimal precision">
-            <option value="2">2</option>
-            <option value="4" selected>4</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
-            <option value="10">10</option>
-          </select>
+          <div id="precision-dropdown" class="precision-dropdown" aria-label="Decimal precision">
+            <button id="precision-trigger" class="precision-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span id="precision-value">4</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div id="precision-menu" class="precision-menu" role="listbox" aria-label="Precision options">
+              <button class="precision-option" type="button" role="option" data-value="2">2</button>
+              <button class="precision-option active" type="button" role="option" data-value="4" aria-selected="true">4</button>
+              <button class="precision-option" type="button" role="option" data-value="6">6</button>
+              <button class="precision-option" type="button" role="option" data-value="8">8</button>
+              <button class="precision-option" type="button" role="option" data-value="10">10</button>
+            </div>
+          </div>
         </div>
       </div>
 
